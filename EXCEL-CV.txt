@@ -1,0 +1,160 @@
+Sub CV()
+Dim cht As Object
+
+Dim lRow As Long
+lRow = ActiveSheet.Cells(Rows.Count, 1).End(xlUp).Row 'last row number in column A
+
+'Dim ColNum As Long
+'ColNum = ActiveSheet.Cells(1, Columns.Count).End(xlToRight).Column + 1
+'MsgBox (ColNum)
+
+Dim rngstring As String
+rngstring = "A2:A" & lRow & "," & "C2:C" & lRow 'range of data
+'Dim colletter As String
+'Dim rng As String
+'Dim searchrng As Range
+'Dim rowfind As Range
+
+'General Graph Parameters
+Set cht = ActiveSheet.ChartObjects.Add(Left:=200, Width:=615, Top:=10, Height:=470)
+'Chart Dimensions
+With cht
+    .Chart.ChartType = xlXYScatterSmoothNoMarkers
+    
+'Set Range/Series of Data
+    .Chart.SetSourceData Source:=ActiveSheet.Range(rngstring)
+
+'Chart Attributes
+    .Chart.SeriesCollection(1).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.ObjectThemeColor = msoThemeColorText1
+        .ForeColor.TintAndShade = 0
+        .ForeColor.Brightness = 0
+        .Transparency = 0
+    End With
+    .Chart.HasLegend = False
+    '.Chart.Legend.Position = xlLegendPositionBottom
+    '.Chart.Legend.Left = 450
+    '.Chart.Legend.Top = 101
+    .Chart.HasTitle = False
+    '.Chart.ChartTitle.Text = "UV/VIS Data"
+    '.Chart.ChartTitle.Font.Bold = True
+    '.Chart.ChartTitle.Font.Size = 20
+    '.Chart.ChartTitle.Font.Underline = xlUnderlineStyleSingle
+
+
+'Lambda Max Text Box
+    'Iterate to make text box message
+    'msg = ChrW(&H3BB) & "max" & vbCrLf
+    'For col = 1 To ColNum / 3
+        'colnumber = (3 * col) - 1 'locations of Abs Columns
+        'colletter = Split(Cells(1, colnumber).Address, "$")(1) 'letter reps.
+        'absmax = Application.WorksheetFunction.Max(Columns(colletter)) 'max val. in abs column
+        'rng = colletter & "3" & ":" & colletter & "778"
+        'Setting first and last occurences of max absorbances
+        'Set firstsearchrng = Range(rng).Find(What:=absmax, searchorder:=xlByColumns, searchdirection:=xlNext)
+        'Set lastsearchrng = Range(rng).Find(What:=absmax, searchorder:=xlByColumns, searchdirection:=xlPrevious)
+        'firstfindrow = firstsearchrng.Row 'row location of first absmax
+        'firstLocation = colletter & firstfindrow 'full location of first absmax
+        'firstlammax = Range(firstLocation).Offset(0, -1) 'corresponding max value in wavelength column
+        'lastfindrow = lastsearchrng.Row
+        'lastLocation = colletter & lastfindrow
+        'lastlammax = Range(lastLocation).Offset(0, -1)
+        'msg = msg & .Chart.SeriesCollection(col).Name
+        'msg = msg & ": " & firstlammax & "-" & lastlammax & " nm" & vbCrLf
+    'Next col
+    'Enter message as text box into chart
+    'With ActiveChart.Shapes.AddTextbox(msoTextOrientationHorizontal, 430, 30, 150, 150)
+            '.TextFrame.Characters.Text = msg
+            '.TextFrame.Characters.Font.Size = 13
+            '.TextFrame.Characters(2, 3).Font.Subscript = True
+            '.TextFrame.Characters(1, 4).Font.Bold = True
+    'End With
+
+End With
+
+'Border
+With ActiveSheet.ChartObjects(1).Chart.PlotArea.Border
+    .LineStyle = xlContinuous
+    .Weight = xlMedium
+    .Color = vbBlack
+End With
+
+'X Axis
+With ActiveSheet.ChartObjects(1).Chart.Axes(xlCategory)
+    .TickLabelPosition = xlTickLabelPositionLow
+    minvalx = Application.WorksheetFunction.Min(Columns(1))
+    .MinimumScale = Application.WorksheetFunction.RoundUp(minvalx, 0)
+    maxvalx = Application.WorksheetFunction.Max(Columns(1))
+    .MaximumScale = Application.WorksheetFunction.RoundUp(maxvalx, 0)
+    'Place axis on border of chart
+    .Crosses = xlMinimum
+    'Title Attributes
+    .HasTitle = True
+    .AxisTitle.Text = "Potential/V"
+    .AxisTitle.Font.Size = 20
+    .AxisTitle.Font.Color = vbBlack
+    .MajorTickMark = xlTickMarkOutside
+    .MinorTickMark = xlTickMarkOutside
+    .Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.ObjectThemeColor = msoThemeColorText1
+        .ForeColor.TintAndShade = 0
+        .ForeColor.Brightness = 0
+        .Transparency = 0
+        .Weight = 2
+    End With
+    With Selection.TickLabels
+        .Font.Size = 24
+        .Font.Color = vbBlack
+    End With
+End With
+
+'Y Axis
+With ActiveSheet.ChartObjects(1).Chart.Axes(xlValue)
+    'Convert from Scientific to Normal Number Format
+    .TickLabels.NumberFormat = "#,##0"
+    'Place Numbers on Bottom of Chart
+    .TickLabelPosition = xlTickLabelPositionLow
+    'Round Up max/min values to get bounds
+    minvalY = Application.WorksheetFunction.Min(Columns(3))
+    .MinimumScale = Application.WorksheetFunction.RoundUp(minvalY, -1)
+    maxvalY = Application.WorksheetFunction.Max(Columns(3))
+    .MaximumScale = Application.WorksheetFunction.RoundUp(maxvalY, -1)
+    'Place axis on border of chart
+    .Crosses = xlMinimum
+    'Title Attributes
+    .HasTitle = True
+    .AxisTitle.Text = "Current/" & Chr(181) & "A"
+    .AxisTitle.Font.Size = 20
+    .AxisTitle.Font.Color = vbBlack
+    .AxisTitle.Left = 1
+    .AxisTitle.Top = 155
+    .MajorTickMark = xlTickMarkOutside
+    .MinorTickMark = xlTickMarkOutside
+    .MajorUnit = 10
+    .Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.ObjectThemeColor = msoThemeColorText1
+        .ForeColor.TintAndShade = 0
+        .ForeColor.Brightness = 0
+        .Transparency = 0
+        .Weight = 2
+    End With
+    With Selection.TickLabels
+        .Font.Size = 24
+        .Font.Color = vbBlack
+    End With
+End With
+
+'Gridlines
+For Each A In ActiveSheet.ChartObjects(1).Chart.Axes
+ A.HasMajorGridlines = False
+ A.HasMinorGridlines = False
+Next A
+
+End Sub
+
