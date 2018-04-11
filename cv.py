@@ -47,10 +47,11 @@ print("Plotting the following:")
 print(csvresult)
 
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
-#import matplotlib.patches as patches
 import pandas as pd
 import math
+from tkinter import *
 
 #Make x-axis
 t = np.linspace(325, 1100, 776)
@@ -94,23 +95,52 @@ while k < len(csvresult):
     #plot graph
     plt.plot(potentialdata, currentdata, colour, label= plotlabel)
     plt.draw()
-    
+    plt.pause(0.0001)
+
+    master = Tk()
+    Label(master, text="Which of the following applies to this graph:").grid(row=0, sticky=W)
+    var1 = IntVar()
+    Checkbutton(master, text="Oxidation", variable=var1).grid(row=1, sticky=SW)
+    var2 = IntVar()
+    Checkbutton(master, text="Reduction", variable=var2).grid(row=2, sticky=W)
+    screen_width=master.winfo_screenwidth()
+    screen_height=master.winfo_screenheight()
+    x_co=(screen_width/2)-240
+    y_co=(screen_height/2)-188
+    master.geometry("%dx%d+%d+%d" % (300,100,x_co,y_co))
+    mainloop()
+    if var1.get()==0:
+        maxcount=1
+        print('Only Reduction')
+    if var2.get()==0:
+        maxcount=1
+        print('Only Oxidation')
+    if var1.get()==1 and var2.get()==1:
+        print('Both Oxidation and Reduction')
+        maxcount=2
+
     count=1
-    while count <= 2:
+    while count <= maxcount:
         xline1=[] #x values of line 1 to fill in as code proceeds
         yline1=[]
         xline2=[]
         yline2=[]
         #Point Clicks and Intersections
         if count==1:
-            print('>> Please choose two points for first line (onset of oxidation)')
+            if var1.get()==0:
+                print('>> Please choose two points for first line (onset of reduction)')
+            else:
+                print('>> Please choose two points for first line (onset of oxidation)')
             line1 = plt.ginput(2) # it will wait for two clicks
             line1=np.array(line1)
             x1=line1[0,0]
             xline1.append(x1)
             y1=line1[0,1]
             yline1.append(y1)
-            print('>> Please choose two points for first line (onset of oxidation)')
+            if var1.get()==0:
+                print('>> Please choose two points for second line (onset of reduction)')
+            else:
+                print('>> Please choose two points for second line (onset of oxidation)')
             line2 = plt.ginput(2)
             line2=np.array(line2)
             x2=line2[0,0]
@@ -125,7 +155,7 @@ while k < len(csvresult):
             xline1.append(x1)
             y1=line1[0,1]
             yline1.append(y1)
-            print('>> Please choose two points for first line (onset of reduction)')
+            print('>> Please choose two points for second line (onset of reduction)')
             line2 = plt.ginput(2)
             line2=np.array(line2)
             x2=line2[0,0]
@@ -155,7 +185,7 @@ while k < len(csvresult):
 
         exportlist.append(x)
         #calculate homo/lumo
-        holu = x - 4.8
+        holu = (-1)*x - 4.8
         exportlist.append(holu)
         #round these values
         x = round(x,2)
@@ -166,7 +196,10 @@ while k < len(csvresult):
         #print message on command prompt
         if count==1:
             print('------------')
-            print("Oxidation onset:")
+            if var1.get()==1:
+                print("Oxidation onset:")
+            if var1.get()==0:
+                print("Reduction onset:")
             print(x + " V")
             print('------------')
         if count==2:
@@ -175,25 +208,44 @@ while k < len(csvresult):
             print(x + " V")
             print('------------')
         count=count+1
+        continue
         
     totalexport.append(exportlist)
     #write texts to put on chart
-    ox=exportlist[0]
-    ox=round(ox,3)
-    ox=str(ox)
-    homo=exportlist[1]
-    homo=round(homo,3)
-    homo=str(homo)
-    red=exportlist[2]
-    red=round(red,3)
-    red=str(red)
-    lumo=exportlist[3]
-    lumo=round(lumo,3)
-    lumo=str(lumo)
-    oxtxt = 'OX' '$_{onset}$' + ' = ' + ox + "V"
-    redtxt = 'RED' '$_{onset}$' + ' = ' + red + "V"
-    homotxt = 'HOMO = ' + homo + "eV"
-    lumotxt = 'LUMO = ' + lumo + "eV"
+    if var1.get()==0:
+        ox='---'
+        homo='---'
+        if var2.get()==1:
+            red=exportlist[0]
+            red=round(red,3)
+            red=str(red)
+            lumo=exportlist[1]
+            lumo=round(lumo,3)
+            lumo=str(lumo)
+        if var2.get()==0:
+            red='---'
+            lumo='---'
+    if var1.get()==1:
+        ox=exportlist[0]
+        ox=round(ox,3)
+        ox=str(ox)
+        homo=exportlist[1]
+        homo=round(homo,3)
+        homo=str(homo)
+        if var2.get()==1:
+            red=exportlist[2]
+            red=round(red,3)
+            red=str(red)
+            lumo=exportlist[3]
+            lumo=round(lumo,3)
+            lumo=str(lumo)
+        if var2.get()==0:
+            red='---'
+            lumo='---'
+    oxtxt = 'OX' '$_{onset}$' + ' = ' + ox + " V"
+    redtxt = 'RED' '$_{onset}$' + ' = ' + red + " V"
+    homotxt = 'HOMO = ' + homo + " eV"
+    lumotxt = 'LUMO = ' + lumo + " eV"
     #change initial value and make first text label
     plt.gca().set_position((.1, .28, .8, .65)) # to make a bit of room for extra text
     vert = 0.14
